@@ -1,8 +1,9 @@
 import { type FastifyPluginCallbackZod } from "fastify-type-provider-zod";
 import z from "zod/v4";
-import { db } from "../../connections.ts";
-import { schema } from "../../schema/index.ts";
+
 import { desc, eq } from "drizzle-orm";
+import { db } from "../../db/connections.ts";
+import { schema } from "../../db/schema/index.ts";
 
 export const getRoomQuestions: FastifyPluginCallbackZod = async (app) => {
   app.get(

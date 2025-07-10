@@ -14,6 +14,7 @@ type RoomParams = {
 export function RecordRoomAudio() {
   const [isRecording, setIsRecording] = useState(false);
   const recorder = useRef<MediaRecorder | null>(null);
+  const intervalRef = useRef<NodeJS.Timeout>(null);
 
   const params = useParams<RoomParams>();
 
@@ -26,6 +27,10 @@ export function RecordRoomAudio() {
 
     if (recorder.current && recorder.current.state !== "inactive") {
       recorder.current.stop();
+    }
+
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
     }
   }
 
@@ -61,6 +66,16 @@ export function RecordRoomAudio() {
       },
     });
 
+    createRecorder(audio);
+
+    intervalRef.current = setInterval(() => {
+      recorder.current?.stop();
+
+      createRecorder(audio);
+    }, 5000);
+  }
+
+  function createRecorder(audio: MediaStream) {
     recorder.current = new MediaRecorder(audio, {
       mimeType: "audio/webm",
       audioBitsPerSecond: 64_000,
@@ -71,6 +86,16 @@ export function RecordRoomAudio() {
         uploadAudio(event.data);
       }
     };
+
+    recorder.current.onstart = () => {
+      console.log("Gravação iniciada!");
+    };
+
+    recorder.current.onstop = () => {
+      console.log("Gravação encerrada/pausada");
+    };
+
+    recorder.current.start();
   }
 
   return (
